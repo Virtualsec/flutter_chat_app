@@ -1,21 +1,31 @@
+import 'package:chat_app/providers/auth_providers.dart';
+import 'package:chat_app/screens/signin_screen/signin_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import 'package:chat_app/utils/app_routes.dart';
+import 'package:provider/provider.dart';
 
-import 'screens/landing_screen/landing_screen.dart';
 import 'theme/app_theme.dart';
 
-void main() => runApp(MyApp());
+Future main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      initialRoute: LandingScreen.routeName,
-      title: 'Chat App',
-      theme: appTheme(),
-      routes: appRoutes,
+    return ChangeNotifierProvider(
+      create: (context) => AuthProvider(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        initialRoute: SigninScreen.routeName,
+        title: 'Chat App',
+        theme: appTheme(),
+        routes: appRoutes,
+      ),
     );
   }
 }

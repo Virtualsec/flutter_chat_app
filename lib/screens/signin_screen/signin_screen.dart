@@ -1,7 +1,12 @@
+import 'dart:developer';
+
+import 'package:chat_app/providers/auth_providers.dart';
 import 'package:chat_app/screens/home_screen/home_screen.dart';
 import 'package:chat_app/screens/signup_screen/signup_screen.dart';
 import 'package:chat_app/theme/app_colors.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class SigninScreen extends StatelessWidget {
   static String routeName = '/signin';
@@ -9,10 +14,48 @@ class SigninScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Container(
-          padding: EdgeInsets.all(16),
-          child: SingleChildScrollView(
+      body: StreamBuilder(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return HomeScreen();
+          } else {
+            return SigninBody();
+          }
+        },
+      ),
+    );
+  }
+}
+
+class SigninBody extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final _formKey = GlobalKey<FormState>();
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+    String _userEmail;
+    String _userPassword;
+
+    void submitData() {
+      final isValid = _formKey.currentState.validate();
+      if (isValid) {
+        _formKey.currentState.save();
+        authProvider.signin(
+          _userEmail.trim(),
+          _userPassword.trim(),
+        );
+        log(_userEmail);
+        log(_userPassword);
+      }
+    }
+
+    return SafeArea(
+      child: Container(
+        padding: EdgeInsets.all(16),
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -33,9 +76,14 @@ class SigninScreen extends StatelessWidget {
                     color: kInputBackgroundColor,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  height: 56,
                   width: double.infinity,
-                  child: TextField(
+                  child: TextFormField(
+                    validator: (value) {
+                      if (value.isEmpty || !value.contains('@')) {
+                        return 'Enter a Valid Email ID';
+                      }
+                      return null;
+                    },
                     style: TextStyle(
                       color: kWhiteTextColor,
                       fontSize: 24,
@@ -48,6 +96,9 @@ class SigninScreen extends StatelessWidget {
                         color: kInputHintTextColor,
                       ),
                     ),
+                    onSaved: (value) {
+                      _userEmail = value;
+                    },
                   ),
                 ),
                 SizedBox(height: 16),
@@ -58,13 +109,19 @@ class SigninScreen extends StatelessWidget {
                     color: kInputBackgroundColor,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  height: 56,
                   width: double.infinity,
-                  child: TextField(
+                  child: TextFormField(
+                    validator: (value) {
+                      if (value.isEmpty || value.length < 6) {
+                        return 'Must be at least 6 characters long.';
+                      }
+                      return null;
+                    },
                     style: TextStyle(
                       color: kWhiteTextColor,
                       fontSize: 24,
                     ),
+                    obscureText: true,
                     decoration: InputDecoration(
                       enabledBorder: InputBorder.none,
                       focusedBorder: InputBorder.none,
@@ -73,14 +130,14 @@ class SigninScreen extends StatelessWidget {
                         color: kInputHintTextColor,
                       ),
                     ),
+                    onSaved: (value) {
+                      _userPassword = value;
+                    },
                   ),
                 ),
                 SizedBox(height: 16),
                 GestureDetector(
-                  onTap: () {
-                    Navigator.pushNamedAndRemoveUntil(
-                        context, HomeScreen.routeName, (_) => false);
-                  },
+                  onTap: submitData,
                   child: Container(
                     width: double.infinity,
                     padding: EdgeInsets.symmetric(vertical: 16),
@@ -117,9 +174,9 @@ class SigninScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 16),
                 GestureDetector(
-                  // onTap: () {
-                  //   Navigator.of(context).pushNamed(SignupScreen.routeName);
-                  // },
+                  onTap: () {
+                    authProvider.googleLogin();
+                  },
                   child: Container(
                     width: double.infinity,
                     padding: EdgeInsets.symmetric(vertical: 16),
