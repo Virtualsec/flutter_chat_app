@@ -1,10 +1,34 @@
+import 'package:chat_app/bloc/auth_bloc/auth_bloc.dart';
+import 'package:chat_app/bloc/auth_bloc/auth_state.dart';
+import 'package:chat_app/screens/home_screen/home_screen.dart';
 import 'package:chat_app/screens/signin_screen/signin_screen.dart';
 import 'package:chat_app/screens/signup_screen/signup_screen.dart';
 import 'package:chat_app/theme/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LandingScreen extends StatelessWidget {
   static String routeName = '/landing';
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        if (state is AuthInitState) {
+          return LandingBody();
+        } else if (state is AuthenticatedState) {
+          return HomeScreen(user: state.user);
+        } else if (state is UnAuthenticatedState) {
+          return SigninScreen();
+        }
+        return LandingScreen();
+      },
+    );
+  }
+}
+
+class LandingBody extends StatelessWidget {
+  const LandingBody({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +126,7 @@ class LandingScreen extends StatelessWidget {
                     ),
                   )
                 ],
-              )
+              ),
             ],
           ),
         ),

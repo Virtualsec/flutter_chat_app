@@ -3,6 +3,7 @@ import 'package:chat_app/screens/home_screen/home_screen.dart';
 import 'package:chat_app/screens/landing_screen/landing_screen.dart';
 import 'package:chat_app/screens/signin_screen/signin_screen.dart';
 import 'package:chat_app/screens/signup_screen/signup_screen.dart';
+import 'package:chat_app/screens/users_screen/users_screen.dart';
 import 'package:flutter/material.dart';
 
 final Map<String, WidgetBuilder> appRoutes = {
@@ -10,5 +11,6 @@ final Map<String, WidgetBuilder> appRoutes = {
   SigninScreen.routeName: (context) => SigninScreen(),
   SignupScreen.routeName: (context) => SignupScreen(),
   HomeScreen.routeName: (context) => HomeScreen(),
+  UsersScreen.routeName: (context) => UsersScreen(),
   ChatScreen.routeName: (context) => ChatScreen(),
 };
